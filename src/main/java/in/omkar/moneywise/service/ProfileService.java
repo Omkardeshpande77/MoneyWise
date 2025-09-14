@@ -7,6 +7,7 @@ import in.omkar.moneywise.repository.ProfileRepository;
 import in.omkar.moneywise.util.JwtUtil;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,13 +27,15 @@ public class ProfileService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Value("${app.activation.url}")
+    private String activationUrl;
     public ProfileDTO registerProfile(ProfileDTO profileDTO) {
         // Logic to register a new profile
         ProfileEntity newProfile =  toEntity(profileDTO);
         newProfile.setActivationCode(UUID.randomUUID().toString());
         newProfile = profileRepository.save(newProfile);
         // Send activation email logic can be added here
-        String activationLink = "http://localhost:8080/api/v1/activate?code=" + newProfile.getActivationCode();
+        String activationLink = activationUrl+"/api/v1/activate?code=" + newProfile.getActivationCode();
         String subject = "Activate your MoneyWise account";
         String body = "Dear " + newProfile.getName() + ",\n\nPlease activate your account by clicking the link below:\n" + activationLink + "\n\nThank you!";
         try {
